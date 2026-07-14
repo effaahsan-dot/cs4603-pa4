@@ -8,10 +8,11 @@ serving contract — see spec Task 1.6).
 
 
 from __future__ import annotations
+
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+
 from agent.prompts import SYNTHESIZER_PROMPT
 from agent.state import AnalystState
-
 
 #Takes everything gathered in step_results and writes one final answer.
 #Writes it to both final_answer and messages (as an AIMessage) — the

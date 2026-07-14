@@ -11,7 +11,6 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import add_messages
 
-
 #this is the shared state that every agent gets in the workflow so that they are on the same page
 
 class AnalystState(TypedDict):

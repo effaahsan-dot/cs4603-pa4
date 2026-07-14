@@ -9,7 +9,9 @@ Reuse `rag/store.py::get_retriever()` so local and deployed retrieval match.
 """
 
 from __future__ import annotations
+
 from langchain_core.messages import HumanMessage, SystemMessage
+
 from agent.prompts import RAG_EXTRACT_PROMPT
 from agent.state import AnalystState
 

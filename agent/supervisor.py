@@ -9,10 +9,10 @@ TODO:
 
 from __future__ import annotations
 
-from agent.state import AnalystState
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from agent.prompts import SUPERVISOR_PROMPT
+from agent.state import AnalystState
 
 #these are the agents that are getting saved and that will get roted to from the supervisor node
 

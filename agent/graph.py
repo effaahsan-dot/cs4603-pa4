@@ -11,12 +11,13 @@ TODO:
 """
 
 from __future__ import annotations
+
 import asyncio
 import json
 from pathlib import Path
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
-
 
 from agent.planner import make_planner
 from agent.prompts import MCP_STEP_PROMPT
@@ -24,7 +25,6 @@ from agent.rag_agent import make_rag_agent
 from agent.state import AnalystState
 from agent.supervisor import MCP, RAG, SYNTH, make_supervisor, route_from_supervisor
 from agent.synthesizer import make_synthesizer
-
 
 _DEFAULT_SERVER_PATH = str(Path(__file__).resolve().parent.parent / "tools" / "mcp_server.py")
 
