@@ -40,6 +40,9 @@ jobs:
         run: ruff check agent/ client/
 
       - name: Smoke test — import and compile the graph
+        env:
+          DATABRICKS_HOST: "https://placeholder.cloud.databricks.com"
+          DATABRICKS_TOKEN: "placeholder-token"
         run: |
           uv run python -c "
           from agent.graph import build_graph
