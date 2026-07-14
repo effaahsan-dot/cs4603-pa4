@@ -22,6 +22,28 @@ jobs:
       - uses: actions/checkout@v4
       # TODO: install uv, sync deps, run `ruff check` and the smoke test
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Lint agent/ and client/
+        run: uv run ruff check agent/ client/
+
+      - name: Smoke test — import and compile the graph
+        run: |
+          uv run python -c "
+          from agent.graph import build_graph
+          graph = build_graph()
+          print('Graph compiled successfully:', graph is not None)
+          "
+
   deploy:
     needs: lint-and-test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -29,3 +51,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # TODO: install deps and run `python deployment/deploy.py` with secrets
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Deploy model to Databricks
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: uv run python deployment/deploy.py
+
+      - name: Print deployed model version and endpoint status
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          uv run python -c "
+          from databricks.sdk import WorkspaceClient
+          w = WorkspaceClient(host='${{ secrets.DATABRICKS_HOST }}', token='${{ secrets.DATABRICKS_TOKEN }}')
+          ep = w.serving_endpoints.get('effa-document-analyst')
+          print('Endpoint state:', ep.state.ready)
+
+          
+          
+          
+          
+          for entity in ep.config.served_entities:
+              print('Deployed model version:', entity.entity_version)
+          "
