@@ -39,18 +39,11 @@ jobs:
       - name: Lint agent/ and client/
         run: ruff check agent/ client/
 
-      - name: Smoke test — import the agent modules
-        run: |
-          uv run python -c "
-          import agent.graph
-          import agent.state
-          import agent.planner
-          import agent.supervisor
-          import agent.rag_agent
-          import agent.synthesizer
-          import client.sdk
-          print('All modules imported successfully — no syntax or import errors.')
-          "
+      - name: Install pytest
+        run: uv add --dev pytest
+
+      - name: Smoke test — build graph with fake dependencies
+        run: uv run pytest tests/test_smoke.py -v
           
   deploy:
     needs: lint-and-test
