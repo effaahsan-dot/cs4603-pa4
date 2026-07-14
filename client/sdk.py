@@ -1,18 +1,12 @@
-"""Python client SDK for the deployed Document Analyst (Part 3).
-
-TODO: Implement `DocumentAnalystClient` and `AnalystClientError` per Task 3.1:
-  - __init__(endpoint_name, host=None, token=None, timeout=120.0, max_retries=3):
-    read DATABRICKS_HOST/DATABRICKS_TOKEN from env when not provided.
-  - ask(question) -> str
-  - ask_streaming(question) -> Iterator[str]   (yield chunks as they arrive)
-  - health_check() -> bool                      (True only when endpoint READY)
-  - exponential backoff on 429/503, TimeoutError with elapsed time, and wrap HTTP
-    errors in AnalystClientError(status_code, message, request_id).
-"""
+"""Python client SDK for the deployed Document Analyst (Part 3)."""
 
 from __future__ import annotations
 
+import os
+import time
 from collections.abc import Iterator
+
+import openai
 
 
 class AnalystClientError(Exception):
@@ -31,13 +25,67 @@ class DocumentAnalystClient:
         timeout: float = 120.0,
         max_retries: int = 3,
     ) -> None:
-        raise NotImplementedError("Task 3.1: implement the client constructor")
+        self.endpoint_name = endpoint_name
+        self.host = (host or os.environ.get("DATABRICKS_HOST", "")).rstrip("/")
+        self.token = token or os.environ.get("DATABRICKS_TOKEN", "")
+
+        if not self.host or not self.token:
+            raise AnalystClientError(
+                "DATABRICKS_HOST and DATABRICKS_TOKEN must be passed in or "
+                "set as environment variables."
+            )
+
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self._client = openai.OpenAI(
+            api_key=self.token,
+            base_url=f"{self.host}/serving-endpoints",
+            timeout=timeout,
+        )
+
+    def _call_with_retry(self, fn, *args, **kwargs):
+        start = time.monotonic()
+        last_error = None
+
+        for attempt in range(self.max_retries + 1):
+            try:
+                return fn(*args, **kwargs)
+            except openai.APITimeoutError as e:
+                elapsed = time.monotonic() - start
+                raise TimeoutError(
+                    f"Request to '{self.endpoint_name}' timed out after {elapsed:.1f}s"
+                ) from e
+            except openai.APIStatusError as e:
+                last_error = e
+                if e.status_code in (429, 503) and attempt < self.max_retries:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise AnalystClientError(
+                    str(e),
+                    status_code=e.status_code,
+                    request_id=getattr(e, "request_id", None),
+                ) from e
+
+        raise AnalystClientError(str(last_error))
 
     def ask(self, question: str) -> str:
-        raise NotImplementedError("Task 3.1: implement ask()")
+        response = self._call_with_retry(
+            self._client.chat.completions.create,
+            model=self.endpoint_name,
+            messages=[{"role": "user", "content": question}],
+        )
+        state = response[0]
+        return state.final_answer
 
     def ask_streaming(self, question: str) -> Iterator[str]:
-        raise NotImplementedError("Task 3.1: implement ask_streaming()")
+        yield self.ask(question)
 
     def health_check(self) -> bool:
-        raise NotImplementedError("Task 3.1: implement health_check()")
+        try:
+            from databricks.sdk import WorkspaceClient
+
+            w = WorkspaceClient(host=self.host, token=self.token)
+            ep = w.serving_endpoints.get(self.endpoint_name)
+            return str(ep.state.ready) == "EndpointStateReady.READY"
+        except Exception:
+            return False

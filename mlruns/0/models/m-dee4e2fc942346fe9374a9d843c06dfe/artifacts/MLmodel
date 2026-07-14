@@ -1,0 +1,49 @@
+artifact_path: /Users/effaahsan/cs4603-pa4/mlruns/0/models/m-dee4e2fc942346fe9374a9d843c06dfe/artifacts
+env_vars:
+- DATABRICKS_HOST
+- DATABRICKS_TOKEN
+flavors:
+  langchain:
+    code: code
+    langchain_version: 1.3.13
+    streamable: true
+  python_function:
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.langchain
+    model_code_path: /Users/effaahsan/cs4603-pa4/deployment/agent_model.py
+    predict_stream_fn: predict_stream
+    python_version: 3.13.12
+    streamable: true
+is_signature_from_type_hint: false
+mlflow_version: 3.14.0
+model_id: m-dee4e2fc942346fe9374a9d843c06dfe
+model_size_bytes: 26313
+model_uuid: m-dee4e2fc942346fe9374a9d843c06dfe
+prompts: null
+run_id: cdc47e9bfa174a649baa120943c0ea33
+saved_input_example_info:
+  artifact_path: input_example.json
+  serving_input_path: serving_input_example.json
+  type: json_object
+signature:
+  inputs: '[{"type": "array", "items": {"type": "object", "properties": {"content":
+    {"type": "string", "required": true}, "role": {"type": "string", "required": true}}},
+    "name": "messages", "required": true}]'
+  outputs: '[{"type": "array", "items": {"type": "object", "properties": {"additional_kwargs":
+    {"type": "any", "required": false}, "content": {"type": "string", "required":
+    true}, "id": {"type": "string", "required": true}, "invalid_tool_calls": {"type":
+    "any", "required": false}, "name": {"type": "any", "required": false}, "response_metadata":
+    {"type": "any", "required": false}, "tool_calls": {"type": "any", "required":
+    false}, "type": {"type": "string", "required": true}, "usage_metadata": {"type":
+    "any", "required": false}}}, "name": "messages", "required": true}, {"type": "array",
+    "items": {"type": "string"}, "name": "plan", "required": true}, {"type": "long",
+    "name": "current_step_index", "required": true}, {"type": "array", "items": {"type":
+    "string"}, "name": "step_results", "required": true}, {"type": "string", "name":
+    "next_agent", "required": true}, {"type": "string", "name": "final_answer", "required":
+    true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-07-13 17:42:12.527832'
