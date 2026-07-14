@@ -43,6 +43,7 @@ jobs:
         env:
           DATABRICKS_HOST: "https://placeholder.cloud.databricks.com"
           DATABRICKS_TOKEN: "placeholder-token"
+          DATABRICKS_MODEL: "databricks-meta-llama-3-3-70b-instruct"
         run: |
           uv run python -c "
           from agent.graph import build_graph
