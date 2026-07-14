@@ -32,9 +32,12 @@ jobs:
 
       - name: Sync dependencies
         run: uv sync
+        
+      - name: Install ruff
+        run: pip install ruff
 
       - name: Lint agent/ and client/
-        run: uv run ruff check agent/ client/
+        run: ruff check agent/ client/
 
       - name: Smoke test — import and compile the graph
         run: |
