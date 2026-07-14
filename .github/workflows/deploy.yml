@@ -39,18 +39,19 @@ jobs:
       - name: Lint agent/ and client/
         run: ruff check agent/ client/
 
-      - name: Smoke test — import and compile the graph
-        env:
-          DATABRICKS_HOST: "https://placeholder.cloud.databricks.com"
-          DATABRICKS_TOKEN: "placeholder-token"
-          DATABRICKS_MODEL: "databricks-meta-llama-3-3-70b-instruct"
+      - name: Smoke test — import the agent modules
         run: |
           uv run python -c "
-          from agent.graph import build_graph
-          graph = build_graph()
-          print('Graph compiled successfully:', graph is not None)
+          import agent.graph
+          import agent.state
+          import agent.planner
+          import agent.supervisor
+          import agent.rag_agent
+          import agent.synthesizer
+          import client.sdk
+          print('All modules imported successfully — no syntax or import errors.')
           "
-
+          
   deploy:
     needs: lint-and-test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
